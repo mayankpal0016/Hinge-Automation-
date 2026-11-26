@@ -287,6 +287,42 @@ input::placeholder{color:#6F6B7A}
     </div>
   </div>
 </div>
-
+<!-- RAZORPAY POPUP -->
+<div id="pay-done" style="display:none;position:fixed;inset:0;z-index:100;background:rgba(14,13,18,.8);align-items:center;justify-content:center;padding:24px">
+  <div style="background:#F5F1EA;color:#16151B;border-radius:28px;padding:36px;max-width:420px;width:100%;text-align:center;font-family:'Inter',sans-serif">
+    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:28px;margin-bottom:10px">Payment received</div>
+    <p style="margin:0 0 6px;font-size:16px;line-height:1.55;color:#4C4A57">Thank you. We'll contact you shortly with your next steps.</p>
+    <p id="pay-id" style="margin:0 0 22px;font-size:13px;color:#6B6877"></p>
+    <button type="button" onclick="document.getElementById('pay-done').style.display='none'" style="background:#16151B;color:#F5F1EA;border:none;border-radius:999px;padding:14px 30px;font-weight:700;font-size:16px;cursor:pointer;font-family:'Inter',sans-serif">Close</button>
+  </div>
+</div>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+// ===== SET THESE =====
+var RAZORPAY_KEY_ID = 'rzp_live_XXXXXXXXXXXXXX'; // Razorpay Dashboard > Account & Settings > API Keys (Key ID only, never the secret)
+var AMOUNT_PAISE = 39900;                         // Rs 399
+// =====================
+document.querySelectorAll('a[href*="rzp.io"]').forEach(function (a) {
+  a.addEventListener('click', function (e) {
+    // If the key isn't set yet or Razorpay didn't load, fall back to the normal payment link.
+    if (!window.Razorpay || RAZORPAY_KEY_ID.indexOf('XXXX') !== -1) return;
+    e.preventDefault();
+    var rzp = new Razorpay({
+      key: RAZORPAY_KEY_ID,
+      amount: AMOUNT_PAISE,
+      currency: 'INR',
+      name: 'Dating Auto Pilot',
+      description: 'Lifetime access',
+      theme: { color: '#FF5A6E' },
+      handler: function (r) {
+        document.getElementById('pay-id').textContent = 'Payment ID: ' + r.razorpay_payment_id;
+        document.getElementById('pay-done').style.display = 'flex';
+      }
+    });
+    rzp.on('payment.failed', function () { /* checkout shows its own retry screen */ });
+    rzp.open();
+  });
+});
+</script>
 </body>
 </html>
